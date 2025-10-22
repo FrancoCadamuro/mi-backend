@@ -31,3 +31,38 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
+
+app.get('/api/confirmaciones/html', async (req, res) => {
+  const Alumno = require('./models/Alumno');
+  const alumnos = await Alumno.find().sort({ fechaConfirmacion: -1 });
+
+  let html = `
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Confirmaciones</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 30px; }
+      h2 { text-align: center; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ccc; padding: 8px; }
+      th { background: #f2f2f2; }
+    </style>
+  </head>
+  <body>
+    <h2>Listado de Confirmaciones 2026</h2>
+    <table>
+      <tr><th>DNI</th><th>Nombre</th><th>Apellido</th><th>Curso</th><th>Fecha</th></tr>
+      ${alumnos.map(a => `
+        <tr>
+          <td>${a.dni}</td>
+          <td>${a.nombre}</td>
+          <td>${a.apellido}</td>
+          <td>${a.curso}</td>
+          <td>${a.fechaConfirmacion ? new Date(a.fechaConfirmacion).toLocaleString('es-AR') : ''}</td>
+        </tr>`).join('')}
+    </table>
+  </body></html>`;
+
+  res.send(html);
+});
