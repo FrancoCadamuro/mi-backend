@@ -4,7 +4,8 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 const Alumno = require('./models/Alumno');
-
+///////////ultima mod
+app.use(express.static(path.join(__dirname, 'public')));
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error MongoDB:', err));
+
 
 // ✅ Ruta HTML global (antes de app.use('/api', ...))
 app.get('/api/confirmaciones/html', async (req, res) => {
