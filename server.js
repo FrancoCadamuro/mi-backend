@@ -13,6 +13,9 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error MongoDB:', err));
+//ultima modificacion
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ Ruta HTML global (antes de app.use('/api', ...))
 app.get('/api/confirmaciones/html', async (req, res) => {
