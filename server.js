@@ -4,19 +4,21 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 const Alumno = require('./models/Alumno');
-///////////ultima mod
-app.use(express.static(path.join(__dirname, 'public')));
-const app = express();
+
+const app = express(); // 👉 Esto va antes que usar 'app'
+
 app.use(cors());
 app.use(express.json());
+
+// 👇 Ahora sí: podés usar 'app'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB conectado'))
   .catch(err => console.error('Error MongoDB:', err));
 
-
-// ✅ Ruta HTML global (antes de app.use('/api', ...))
+// ✅ Ruta HTML global
 app.get('/api/confirmaciones/html', async (req, res) => {
   try {
     const alumnos = await Alumno.find().sort({ fechaConfirmacion: -1 });
@@ -43,7 +45,7 @@ app.get('/api/confirmaciones/html', async (req, res) => {
   }
 });
 
-// ✅ Luego montás tus rutas API normales
+// Rutas API
 app.use('/api', require('./routes/alumnos'));
 
 const PORT = process.env.PORT || 5000;
