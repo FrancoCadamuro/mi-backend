@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-
+const path = require('path');
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -15,23 +16,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB conectado'))
 .catch(err => console.error('Error MongoDB:', err));
 
-// Rutas
-app.use('/api', require('./routes/alumnos'));
-
-const PORT = process.env.PORT || 5000;
-const path = require('path');
-
-// Servir el index.html directamente
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
-});
-
+// ✅ Ruta HTML antes del use('/api')
 app.get('/api/confirmaciones/html', async (req, res) => {
   const Alumno = require('./models/Alumno');
   const alumnos = await Alumno.find().sort({ fechaConfirmacion: -1 });
@@ -65,4 +50,18 @@ app.get('/api/confirmaciones/html', async (req, res) => {
   </body></html>`;
 
   res.send(html);
+});
+
+// ✅ Luego las rutas API
+app.use('/api', require('./routes/alumnos'));
+
+// Servir index.html
+app.use(express.static(__dirname));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en puerto ${PORT}`);
 });
