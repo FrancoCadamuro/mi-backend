@@ -3,65 +3,46 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
-const app = express();
+const Alumno = require('./models/Alumno');
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB conectado'))
-.catch(err => console.error('Error MongoDB:', err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB conectado'))
+  .catch(err => console.error('Error MongoDB:', err));
 
-// ✅ Ruta HTML antes del use('/api')
+// ✅ Ruta HTML global (antes de app.use('/api', ...))
 app.get('/api/confirmaciones/html', async (req, res) => {
-  const Alumno = require('./models/Alumno');
-  const alumnos = await Alumno.find().sort({ fechaConfirmacion: -1 });
-
-  let html = `
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Confirmaciones</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 30px; }
-      h2 { text-align: center; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #ccc; padding: 8px; }
-      th { background: #f2f2f2; }
-    </style>
-  </head>
-  <body>
-    <h2>Listado de Confirmaciones 2026</h2>
-    <table>
-      <tr><th>DNI</th><th>Nombre</th><th>Apellido</th><th>Curso</th><th>Fecha</th></tr>
-      ${alumnos.map(a => `
-        <tr>
-          <td>${a.dni}</td>
-          <td>${a.nombre}</td>
-          <td>${a.apellido}</td>
-          <td>${a.curso}</td>
-          <td>${a.fechaConfirmacion ? new Date(a.fechaConfirmacion).toLocaleString('es-AR') : ''}</td>
-        </tr>`).join('')}
-    </table>
-  </body></html>`;
-
-  res.send(html);
+  try {
+    const alumnos = await Alumno.find().sort({ fechaConfirmacion: -1 });
+    let html = `
+      <html><head><title>Confirmaciones</title></head>
+      <body><h2>Listado de confirmaciones</h2>
+      <table border="1" cellpadding="5">
+      <tr><th>DNI</th><th>Nombre</th><th>Apellido</th><th>Curso</th><th>Confirmado</th><th>Fecha</th></tr>`;
+    alumnos.forEach(a => {
+      html += `<tr>
+        <td>${a.dni}</td>
+        <td>${a.nombre}</td>
+        <td>${a.apellido}</td>
+        <td>${a.curso}</td>
+        <td>${a.confirmado ? '✅' : '❌'}</td>
+        <td>${a.fechaConfirmacion ? new Date(a.fechaConfirmacion).toLocaleString() : ''}</td>
+      </tr>`;
+    });
+    html += '</table></body></html>';
+    res.send(html);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error generando el HTML');
+  }
 });
 
-// ✅ Luego las rutas API
+// ✅ Luego montás tus rutas API normales
 app.use('/api', require('./routes/alumnos'));
 
-// Servir index.html
-app.use(express.static(__dirname));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Servidor escuchando en puerto ${PORT}`));
