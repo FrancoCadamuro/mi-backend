@@ -1,3 +1,4 @@
+ HEAD
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -70,3 +71,4 @@ app.use('/api', require('./routes/alumnos'));
 // Puerto
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Servidor escuchando en puerto ${PORT}`));
+
