@@ -48,5 +48,5 @@ app.get('/api/confirmaciones/html', async (req, res) => {
 // Rutas API
 app.use('/api', require('./routes/alumnos'));
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Servidor escuchando en puerto ${PORT}`));
